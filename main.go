@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"unitehub-api/controllers"
 	"unitehub-api/initializers"
+	"unitehub-api/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -34,6 +36,15 @@ func main() {
 		AllowMethods:     "GET, POST",
 		AllowCredentials: true,
 	}))
+
+	micro.Route("/auth", func(router fiber.Router) {
+		router.Post("/register", controllers.SignUpUser)
+		router.Post("/login", controllers.SignInUser)
+		router.Get("/logout", middleware.DeserializeUser, controllers.LogoutUser)
+		router.Get("/refresh", controllers.RefreshAccessToken)
+	})
+
+	micro.Get("/users/me", middleware.DeserializeUser, controllers.GetMe)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
