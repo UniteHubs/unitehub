@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - 5432:5432
+    env_file:
+      - ./.env.dev
+    networks:
+      - unitehub-network
+    mem_limit: 256m
+
+  pgAdmin:
+    image: dpage/pgadmin4
+    container_name: pgAdmin
+    env_file:
+      - ./.env.dev
+    networks:
+      - unitehub-network
+    ports:
+      - 5050:80
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    networks:
+      - unitehub-network
+    ports:
+      - 6379:6379
+  app:
+    container_name: unitehub-api
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/app 
+    networks:
+      - unitehub-network
+    depends_on:
+      - redis
+      - postgres
+    restart: always
+
+networks:
+  unitehub-network:
+    driver: bridge
+    # external: true
+
+volumes:
+  unitehub-data:
+    name: unitehub-data
