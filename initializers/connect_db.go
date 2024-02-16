@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"unitehub-api/models"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -26,4 +28,12 @@ func ConnectDB(config *Config) {
 	DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
 	DB.Logger = logger.Default.LogMode(logger.Info)
 
+	log.Println("Running Migrations")
+	err = DB.AutoMigrate(&models.User{})
+	if err != nil {
+		log.Fatal("Migration Failed:  \n", err.Error())
+		os.Exit(1)
+	}
+
+	log.Println("🚀 Connected Successfully to the Database")
 }
